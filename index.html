@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Registration</title>
+    <style>
+       
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #000;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+     
+        body.dark-mode {
+            background-color: #121212;
+            color: #fff;
+        }
+
+        
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color:dodgerblue;
+            color: white;
+            padding: 10px 20px;
+        }
+
+        .navbar .brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .navbar .nav-links {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-size: 1rem;
+        }
+
+        .navbar a:hover {
+            text-decoration: underline;
+        }
+
+        
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown input {
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .dropdown-content {
+            position: absolute;
+            top: 35px;
+            left: 0;
+            display: none;
+            background-color: white;
+            color: black;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-height: 200px;
+            overflow-y: auto;
+            width: 200px;
+        }
+
+        .dropdown-content a {
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+            color: black;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #f4f4f4;
+        }
+
+        .dropdown input:focus + .dropdown-content,
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+    
+        body.dark-mode .dropdown-content {
+            background-color: #333;
+            color: white;
+        }
+
+        
+        .card {
+            max-width: 500px;
+            margin: 50px auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s;
+        }
+
+        body.dark-mode .card {
+            background-color: #222;
+        }
+
+        .card h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+     
+        form label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        form input[type="text"],
+        form input[type="email"],
+        form input[type="date"],
+        form select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        form button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-top: 20px;
+            background-color: dodgerblue;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        form button:hover {
+            background-color: #0056b3;
+        }
+
+       
+        #userData {
+            margin-top: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f4f4f4;
+        }
+
+        body.dark-mode th {
+            background-color: #333;
+        }
+    </style>
+</head>
+<body>
+
+    
+    <div class="navbar">
+        <div class="brand">Student Registration</div>
+        <div class="nav-links">
+            <a href="#home">Home</a>
+            <a href="#about">About</a>
+            <a href="#contact">Contact</a>
+            <div class="dropdown">
+                <input type="text" id="searchUser" placeholder="Search users...">
+                <div class="dropdown-content" id="userDropdown"></div>
+            </div>
+            <button id="darkModeToggle">Dark Mode</button>
+        </div>
+    </div>
+
+    
+    <div class="card">
+        <h1>Register</h1>
+        <form id="userForm">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+        
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+        
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+    <h2 style="text-align: center;">Registered Students</h2>
+    <div id="userData">
+    </div>
+
+    <script>
+        const toggleDarkMode = document.getElementById('darkModeToggle');
+        toggleDarkMode.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+        });
+
+        const searchInput = document.getElementById('searchUser');
+        const dropdownContent = document.getElementById('userDropdown');
+
+        const fetchUsers = () => {
+            fetch('http://localhost:3000/users')
+                .then(response => response.json())
+                .then(data => {
+                    dropdownContent.innerHTML = '';
+                    data.forEach(user => {
+                        const userLink = document.createElement('a');
+                        userLink.href = '#';
+                        userLink.textContent = user.name;
+                        dropdownContent.appendChild(userLink);
+                    });
+                })
+                .catch(error => console.error('Error fetching users:', error));
+        };
+
+        searchInput.addEventListener('focus', fetchUsers);
+        searchInput.addEventListener('input', () => {
+            const filter = searchInput.value.toLowerCase();
+            const userLinks = dropdownContent.querySelectorAll('a');
+            userLinks.forEach(link => {
+                link.style.display = link.textContent.toLowerCase().includes(filter) ? 'block' : 'none';
+            });
+        });
+    </script>
+    <script src="app.js"></script>
+</body>
+</html>
